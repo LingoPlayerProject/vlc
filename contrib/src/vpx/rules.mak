@@ -138,10 +138,6 @@ endif
 VPX_LDFLAGS += -arch $(PLATFORM_SHORT_ARCH)
 endif
 
-ifndef WITH_OPTIMIZATION
-VPX_CONF += --enable-debug --disable-optimizations
-endif
-
 ifdef HAVE_ANDROID
 # Starting NDK19, standalone toolchains are deprecated and gcc is not shipped.
 # The presence of gcc can be used to detect if we are using an old standalone
