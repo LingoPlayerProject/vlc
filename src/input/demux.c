@@ -29,6 +29,7 @@
 #include <limits.h>
 
 #include "demux.h"
+#include "modules/modules.h"
 #include <libvlc.h>
 #include <vlc_codec.h>
 #include <vlc_meta.h>
@@ -273,6 +274,10 @@ demux_t *demux_NewAdvanced( vlc_object_t *p_obj, input_thread_t *p_parent_input,
     if( p_demux->p_module == NULL )
         goto error;
 
+    msg_Info( p_demux, "TRACK_SEEK created demux: psz_access='%s' psz_demux='%s' name1=%s name2=%s help=%s file='%s'",
+                p_demux->psz_access, p_demux->psz_demux,
+                p_demux->p_module->psz_shortname, p_demux->p_module->psz_longname, p_demux->p_module->psz_help, p_demux->psz_file );
+
     return p_demux;
 error:
     free( p_demux->psz_file );
@@ -376,7 +381,7 @@ int demux_vaControlHelper( stream_t *s,
     int64_t i_tell;
     double  f, *pf;
     int64_t i64, *pi64;
-
+    msg_Info( s, "TRACK_SEEK demux_vaControlHelper "); //todo del
     if( i_end < 0 )    i_end   = stream_Size( s );
     if( i_start < 0 )  i_start = 0;
     if( i_align <= 0 ) i_align = 1;
@@ -439,6 +444,7 @@ int demux_vaControlHelper( stream_t *s,
 
 
         case DEMUX_SET_POSITION:
+            msg_Info( s, "TRACK_SEEK demux_vaControlHelper DEMUX_SET_POSITION "); //todo del
             f = (double)va_arg( args, double );
             if( i_start < i_end && f >= 0.0 && f <= 1.0 )
             {
@@ -453,6 +459,7 @@ int demux_vaControlHelper( stream_t *s,
             return VLC_EGENERIC;
 
         case DEMUX_SET_TIME:
+            msg_Info( s, "TRACK_SEEK demux_vaControlHelper DEMUX_SET_TIME "); //todo del
             i64 = (int64_t)va_arg( args, int64_t );
             if( i_bitrate > 0 && i64 >= 0 )
             {

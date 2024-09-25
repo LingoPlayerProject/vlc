@@ -2034,7 +2034,6 @@ static bool Control( input_thread_t *p_input,
         {
             int64_t i_time;
             int i_ret;
-
             if( input_priv(p_input)->b_recording )
             {
                 msg_Err( p_input, "INPUT_CONTROL_SET_TIME ignored while recording" );
@@ -2044,6 +2043,7 @@ static bool Control( input_thread_t *p_input,
             i_time = val.i_int;
             if( i_time < 0 )
                 i_time = 0;
+            msg_Info( p_input, "TRACK_SEEK INPUT_CONTROL_SET_TIME i_time %lld, fast %d", i_time, var_GetBool( p_input, "input-fast-seek" ) ? 1 : 0 ); //todo del
 
             /* Reset the decoders states and clock sync (before calling the demuxer */
             es_out_SetTime( input_priv(p_input)->p_es_out, -1 );
@@ -2051,6 +2051,7 @@ static bool Control( input_thread_t *p_input,
             i_ret = demux_Control( input_priv(p_input)->master->p_demux,
                                    DEMUX_SET_TIME, i_time,
                                    !var_GetBool( p_input, "input-fast-seek" ) );
+            msg_Info( p_input, "TRACK_SEEK INPUT_CONTROL_SET_TIME >> DEMUX_SET_TIME, i_time %lld, ret %d, fast %d", i_time, i_ret, var_GetBool( p_input, "input-fast-seek" ) ? 1 : 0 ); //todo del
             if( i_ret )
             {
                 int64_t i_length;
@@ -2061,6 +2062,7 @@ static bool Control( input_thread_t *p_input,
                 {
                     double f_pos = (double)i_time / (double)i_length;
                     f_pos = VLC_CLIP(f_pos, 0.0, 1.0);
+                    msg_Info( p_input, "TRACK_SEEK INPUT_CONTROL_SET_TIME >> position i_time %lld, f_pos %f, fast %d", i_time, f_pos, var_GetBool( p_input, "input-fast-seek" ) ? 1 : 0 ); //todo del
                     i_ret = demux_Control( input_priv(p_input)->master->p_demux,
                                             DEMUX_SET_POSITION, f_pos,
                                             !var_GetBool( p_input, "input-fast-seek" ) );

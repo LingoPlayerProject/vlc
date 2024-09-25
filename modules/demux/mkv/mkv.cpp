@@ -433,7 +433,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
         case DEMUX_SET_TIME:
             i64 = va_arg( args, int64_t );
             b = va_arg( args, int ); /* precise? */
-            msg_Dbg(p_demux,"SET_TIME to %" PRId64, i64 );
+            msg_Info(p_demux,"TRACK_SEEK mkv SET_TIME to %lld fast %d", i64 , b );
             return Seek( p_demux, i64, -1, NULL, b );
         default:
             return VLC_EGENERIC;

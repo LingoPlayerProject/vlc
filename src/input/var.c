@@ -624,6 +624,7 @@ static int TimeCallback( vlc_object_t *p_this, char const *psz_cmd,
         var_SetInteger( p_input, "intf-event", INPUT_EVENT_POSITION );
     }
 
+    msg_Info( p_this, "TRACK_SEEK TimeCallback old %lld, new %lld\n" , oldval, newval); //todo del
     input_ControlPush( p_input, INPUT_CONTROL_SET_TIME, &newval );
     return VLC_SUCCESS;
 }
