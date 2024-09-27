@@ -334,9 +334,10 @@ es_out_t *input_EsOutNew( input_thread_t *p_input, int i_rate )
     p_sys->i_rate = i_rate;
 
     p_sys->b_buffering = true;
+    if (p_sys->i_preroll_end != -1)
+        msg_Info(p_input, "TRACK_SEEK es_out.c input_EsOutNew set preroll to %lld \n", p_sys->i_preroll_end); // todo del
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
-    msg_Info(p_input, "TRACK_SEEK es_out.c input_EsOutNew set preroll to %lld \n", p_sys->i_preroll_end); // todo del
     return out;
 }
 
@@ -633,9 +634,10 @@ static void EsOutChangePosition( es_out_t *out )
     p_sys->i_buffering_extra_initial = 0;
     p_sys->i_buffering_extra_stream = 0;
     p_sys->i_buffering_extra_system = 0;
+    if (p_sys->i_preroll_end != -1)
+        msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c EsOutChangePosition set preroll to %lld \n", p_sys->i_preroll_end); // todo del
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
-    msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c EsOutChangePosition set preroll to %lld \n", p_sys->i_preroll_end); // todo del
 
 }
 
@@ -685,9 +687,10 @@ static void EsOutDecodersStopBuffering( es_out_t *out, bool b_forced )
     msg_Dbg( p_sys->p_input, "Stream buffering done (%d ms in %d ms)",
               (int)(i_stream_duration/1000), (int)(i_system_duration/1000) );
     p_sys->b_buffering = false;
+    if (p_sys->i_preroll_end != -1)
+        msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c EsOutDecodersStopBuffering set preroll to %lld \n", p_sys->i_preroll_end); // todo del
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
-    msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c EsOutDecodersStopBuffering set preroll to %lld \n", p_sys->i_preroll_end); // todo del
 
     if( p_sys->i_buffering_extra_initial > 0 )
     {
@@ -874,9 +877,10 @@ static void EsOutFrameNext( es_out_t *out )
                                       ( p_sys->i_buffering_extra_system - p_sys->i_buffering_extra_initial ) *
                                                 INPUT_RATE_DEFAULT / i_rate;
 
+    if (p_sys->i_preroll_end != -1)
+        msg_Info(out->p_sys->p_input, "TRACK_SEEK es_out.c EsOutFrameNext set preroll to %lld \n", p_sys->i_preroll_end); // todo del
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
-    msg_Info(out->p_sys->p_input, "TRACK_SEEK es_out.c EsOutFrameNext set preroll to %lld \n", p_sys->i_preroll_end); // todo del
 
 }
 static vlc_tick_t EsOutGetBuffering( es_out_t *out )

@@ -274,10 +274,6 @@ demux_t *demux_NewAdvanced( vlc_object_t *p_obj, input_thread_t *p_parent_input,
     if( p_demux->p_module == NULL )
         goto error;
 
-    msg_Info( p_demux, "TRACK_SEEK created demux: psz_access='%s' psz_demux='%s' name1=%s name2=%s help=%s file='%s'",
-                p_demux->psz_access, p_demux->psz_demux,
-                p_demux->p_module->psz_shortname, p_demux->p_module->psz_longname, p_demux->p_module->psz_help, p_demux->psz_file );
-
     return p_demux;
 error:
     free( p_demux->psz_file );

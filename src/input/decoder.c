@@ -769,15 +769,21 @@ static inline void DecoderUpdatePreroll( vlc_object_t *obj, int64_t *pi_preroll,
 {
     if( p->i_flags & BLOCK_FLAG_PREROLL )
     {
+        if (*pi_preroll != INT64_MAX) 
+        {
+            msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 1 set preroll to %lld \n", INT64_MAX); // todo del
+        }
         *pi_preroll = INT64_MAX;
-        msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 1 set preroll to %lld \n", INT64_MAX); // todo del
     }
     /* Check if we can use the packet for end of preroll */
     else if( (p->i_flags & BLOCK_FLAG_DISCONTINUITY) &&
              (p->i_buffer == 0 || (p->i_flags & BLOCK_FLAG_CORRUPTED)) ) 
     {
+        if (*pi_preroll != INT64_MAX) 
+        {
+            msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 2 set preroll to %lld \n", INT64_MAX); // todo del
+        }
         *pi_preroll = INT64_MAX;
-        msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 2 set preroll to %lld \n", INT64_MAX); // todo del
     }
     else if( p->i_dts > VLC_TICK_INVALID )
     {
@@ -1032,8 +1038,11 @@ static int DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
     }
 
     prerolled = p_owner->i_preroll_end > INT64_MIN;
+    if (p_owner->i_preroll_end != INT64_MIN) 
+    {
+        msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayVideo set preroll to %lld \n", INT64_MIN); // todo del
+    }
     p_owner->i_preroll_end = INT64_MIN;
-    msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayVideo set preroll to %lld \n", INT64_MIN); // todo del
     vlc_mutex_unlock( &p_owner->lock );
 
     if( unlikely(prerolled) )
@@ -1170,9 +1179,10 @@ static int DecoderPlayAudio( decoder_t *p_dec, block_t *p_audio,
     }
 
     prerolled = p_owner->i_preroll_end > INT64_MIN;
+    if ( p_owner->i_preroll_end != INT64_MIN )
+        msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayAudio set preroll to %lld \n", INT64_MIN); // todo del
     p_owner->i_preroll_end = INT64_MIN;
     vlc_mutex_unlock( &p_owner->lock );
-    msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayAudio set preroll to %lld \n", INT64_MIN); // todo del
 
     if( unlikely(prerolled) )
     {
@@ -1552,8 +1562,9 @@ static void DecoderProcessFlush( decoder_t *p_dec )
     }
 
     vlc_mutex_lock( &p_owner->lock );
+    if (p_owner->i_preroll_end != INT64_MIN)
+        msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderProcessFlush set preroll to %lld \n", INT64_MIN); // todo del
     p_owner->i_preroll_end = INT64_MIN;
-    msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderProcessFlush set preroll to %lld \n", INT64_MIN); // todo del
 
     vlc_mutex_unlock( &p_owner->lock );
 }

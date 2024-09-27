@@ -3004,9 +3004,9 @@ static void SlaveSeek( input_thread_t *p_input, int64_t i_time)
         // fix seek not acurrate issue: sometime it is unable to get seek time from master demux, 
         // such as mp4.c with certain files, and the es_out object is shared by multi demux,
         // so the SlaveSeek can changes the es_out's seek time to wrong. so we use passed time first.
-        msg_Err( p_input, "SEEK_TRACK SlaveSeek got i_time from master demux %lld \n", i_time);
+        msg_Info( p_input, "TRACK_SEEK SlaveSeek got i_time from master demux %lld \n", i_time);
     }
-    msg_Err( p_input, "SEEK_TRACK SlaveSeek i_time %lld \n", i_time);
+    msg_Info( p_input, "TRACK_SEEK SlaveSeek i_time %lld \n", i_time);
 
     for( i = 0; i < input_priv(p_input)->i_slave; i++ )
     {
