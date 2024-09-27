@@ -1824,7 +1824,10 @@ static int FragSeekToTime( demux_t *p_demux, vlc_tick_t i_nztime, bool b_accurat
     MP4ASF_ResetFrames( p_sys );
     /* And set next display time in that trun/fragment */
     if( b_accurate )
+    {
+        msg_Info(p_demux, "TRACK_SEEK mp4.c ES_OUT_SET_NEXT_DISPLAY_TIME %lld \n", VLC_TICK_0 + i_nztime);
         es_out_Control( p_demux->out, ES_OUT_SET_NEXT_DISPLAY_TIME, VLC_TICK_0 + i_nztime );
+    }
     return VLC_SUCCESS;
 }
 

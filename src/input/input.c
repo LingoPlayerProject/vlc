@@ -90,7 +90,7 @@ static void InputSourceMeta( input_thread_t *, input_source_t *, vlc_meta_t * );
 /* TODO */
 //static void InputGetAttachments( input_thread_t *, input_source_t * );
 static void SlaveDemux( input_thread_t *p_input );
-static void SlaveSeek( input_thread_t *p_input );
+static void SlaveSeek( input_thread_t *p_input, int64_t i_time );
 
 static void InputMetaUser( input_thread_t *p_input, vlc_meta_t *p_meta );
 static void InputUpdateMeta( input_thread_t *p_input, demux_t *p_demux );
@@ -2022,7 +2022,7 @@ static bool Control( input_thread_t *p_input,
             else
             {
                 if( input_priv(p_input)->i_slave > 0 )
-                    SlaveSeek( p_input );
+                    SlaveSeek( p_input, -1 );
                 input_priv(p_input)->master->b_eof = false;
 
                 b_force_update = true;
@@ -2076,7 +2076,7 @@ static bool Control( input_thread_t *p_input,
             else
             {
                 if( input_priv(p_input)->i_slave > 0 )
-                    SlaveSeek( p_input );
+                    SlaveSeek( p_input, i_time );
                 input_priv(p_input)->master->b_eof = false;
 
                 b_force_update = true;
@@ -2313,7 +2313,7 @@ static bool Control( input_thread_t *p_input,
                            DEMUX_SET_SEEKPOINT, i_seekpoint );
             input_SendEventSeekpoint( p_input, i_title, i_seekpoint );
             if( input_priv(p_input)->i_slave > 0 )
-                SlaveSeek( p_input );
+                SlaveSeek( p_input, -1 );
             break;
         }
 
@@ -2991,16 +2991,22 @@ static void SlaveDemux( input_thread_t *p_input )
     }
 }
 
-static void SlaveSeek( input_thread_t *p_input )
+static void SlaveSeek( input_thread_t *p_input, int64_t i_time)
 {
-    int64_t i_time;
     int i;
-
-    if( demux_Control( input_priv(p_input)->master->p_demux, DEMUX_GET_TIME, &i_time ) )
+    if (i_time == -1) 
     {
-        msg_Err( p_input, "demux doesn't like DEMUX_GET_TIME" );
-        return;
+        if( demux_Control( input_priv(p_input)->master->p_demux, DEMUX_GET_TIME, &i_time ) )
+        {
+            msg_Err( p_input, "demux doesn't like DEMUX_GET_TIME" );
+            return;
+        }
+        // fix seek not acurrate issue: sometime it is unable to get seek time from master demux, 
+        // such as mp4.c with certain files, and the es_out object is shared by multi demux,
+        // so the SlaveSeek can changes the es_out's seek time to wrong. so we use passed time first.
+        msg_Err( p_input, "SEEK_TRACK SlaveSeek got i_time from master demux %lld \n", i_time);
     }
+    msg_Err( p_input, "SEEK_TRACK SlaveSeek i_time %lld \n", i_time);
 
     for( i = 0; i < input_priv(p_input)->i_slave; i++ )
     {
