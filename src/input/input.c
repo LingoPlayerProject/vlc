@@ -2994,6 +2994,7 @@ static void SlaveDemux( input_thread_t *p_input )
 static void SlaveSeek( input_thread_t *p_input, int64_t i_time)
 {
     int i;
+    i_time = -1;
     if (i_time == -1) 
     {
         if( demux_Control( input_priv(p_input)->master->p_demux, DEMUX_GET_TIME, &i_time ) )
@@ -3012,7 +3013,7 @@ static void SlaveSeek( input_thread_t *p_input, int64_t i_time)
     {
         input_source_t *in = input_priv(p_input)->slave[i];
 
-        if( demux_Control( in->p_demux, DEMUX_SET_TIME, i_time, true ) )
+        if( demux_Control( in->p_demux, DEMUX_SET_TIME, i_time, false ) )
         {
             if( !in->b_eof )
                 msg_Err( p_input, "seek failed for slave %d -> EOF", i );
