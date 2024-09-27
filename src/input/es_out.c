@@ -336,7 +336,7 @@ es_out_t *input_EsOutNew( input_thread_t *p_input, int i_rate )
     p_sys->b_buffering = true;
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
-
+    msg_Info(p_input, "TRACK_SEEK es_out.c input_EsOutNew set preroll to %lld \n", p_sys->i_preroll_end); // todo del
     return out;
 }
 
@@ -635,6 +635,8 @@ static void EsOutChangePosition( es_out_t *out )
     p_sys->i_buffering_extra_system = 0;
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
+    msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c EsOutChangePosition set preroll to %lld \n", p_sys->i_preroll_end); // todo del
+
 }
 
 
@@ -685,6 +687,7 @@ static void EsOutDecodersStopBuffering( es_out_t *out, bool b_forced )
     p_sys->b_buffering = false;
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
+    msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c EsOutDecodersStopBuffering set preroll to %lld \n", p_sys->i_preroll_end); // todo del
 
     if( p_sys->i_buffering_extra_initial > 0 )
     {
@@ -873,6 +876,8 @@ static void EsOutFrameNext( es_out_t *out )
 
     p_sys->i_preroll_end = -1;
     p_sys->i_prev_stream_level = -1;
+    msg_Info(out->p_sys->p_input, "TRACK_SEEK es_out.c EsOutFrameNext set preroll to %lld \n", p_sys->i_preroll_end); // todo del
+
 }
 static vlc_tick_t EsOutGetBuffering( es_out_t *out )
 {
@@ -2638,7 +2643,7 @@ static int EsOutControlLocked( es_out_t *out, int i_query, va_list args )
             return VLC_EGENERIC;
 
         p_sys->i_preroll_end = i_date;
-
+        msg_Info(p_sys->p_input, "TRACK_SEEK es_out.c ES_OUT_SET_NEXT_DISPLAY_TIME set preroll to %lld \n", p_sys->i_preroll_end ); // todo del
         return VLC_SUCCESS;
     }
     case ES_OUT_SET_GROUP_META:

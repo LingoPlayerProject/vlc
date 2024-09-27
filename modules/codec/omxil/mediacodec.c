@@ -936,7 +936,10 @@ static int Video_ProcessOutput(decoder_t *p_dec, mc_api_out *p_out,
         }
 
         if (p_out->buf.i_ts <= p_sys->i_preroll_end)
+        {
+            msg_Info(p_dec, "TRACK_SEEK mediacodec.c Video_ProcessOutput skip frame, preroll end %lld, frame %lld \n", p_sys->i_preroll_end, p_out->buf.i_ts); // todo del
             return p_sys->api.release_out(&p_sys->api, p_out->buf.i_index, false);
+        }
 
         if (!p_sys->api.b_direct_rendering && p_out->buf.p_ptr == NULL)
         {
@@ -1171,6 +1174,7 @@ static void DecodeFlushLocked(decoder_t *p_dec)
     p_sys->b_input_dequeued = false;
     p_sys->b_flush_out = true;
     p_sys->i_preroll_end = 0;
+    msg_Info(p_dec, "TRACK_SEEK mediacodec.c DecodeFlushLocked i_preroll_end set to 0 \n"); // todo del
     p_sys->b_output_ready = false;
     /* Resend CODEC_CONFIG buffer after a flush */
     p_sys->i_csd_send = 0;
@@ -1369,7 +1373,10 @@ static int QueueBlockLocked(decoder_t *p_dec, block_t *p_in_block,
                 if (!b_config && p_block != NULL)
                 {
                     if (p_block->i_flags & BLOCK_FLAG_PREROLL)
+                    {
+                        msg_Info(p_dec, "TRACK_SEEK mediacodec.c QueueBlockLocked set preroll to %lld \n", i_ts); // todo del
                         p_sys->i_preroll_end = i_ts;
+                    }
 
                     /* One input buffer is queued, signal OutThread that will
                      * fetch output buffers */

@@ -765,18 +765,36 @@ static int DecoderTimedWait( decoder_t *p_dec, vlc_tick_t deadline )
     return ret;
 }
 
-static inline void DecoderUpdatePreroll( int64_t *pi_preroll, const block_t *p )
+static inline void DecoderUpdatePreroll( vlc_object_t *obj, int64_t *pi_preroll, const block_t *p )
 {
     if( p->i_flags & BLOCK_FLAG_PREROLL )
+    {
         *pi_preroll = INT64_MAX;
+        msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 1 set preroll to %lld \n", INT64_MAX); // todo del
+    }
     /* Check if we can use the packet for end of preroll */
     else if( (p->i_flags & BLOCK_FLAG_DISCONTINUITY) &&
-             (p->i_buffer == 0 || (p->i_flags & BLOCK_FLAG_CORRUPTED)) )
+             (p->i_buffer == 0 || (p->i_flags & BLOCK_FLAG_CORRUPTED)) ) 
+    {
         *pi_preroll = INT64_MAX;
+        msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 2 set preroll to %lld \n", INT64_MAX); // todo del
+    }
     else if( p->i_dts > VLC_TICK_INVALID )
+    {
+        if (p->i_dts < *pi_preroll) 
+        {
+            msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 3 set preroll to %lld \n", p->i_dts); // todo del
+        }
         *pi_preroll = __MIN( *pi_preroll, p->i_dts );
+    }
     else if( p->i_pts > VLC_TICK_INVALID )
+    {
+        if (p->i_pts < *pi_preroll) 
+        {
+            msg_Info(obj, "TRACK_SEEK decoder.c DecoderUpdatePreroll 4 set preroll to %lld \n", p->i_pts); // todo del
+        }
         *pi_preroll = __MIN( *pi_preroll, p->i_pts );
+    }
 }
 
 static void DecoderFixTs( decoder_t *p_dec, vlc_tick_t *pi_ts0, vlc_tick_t *pi_ts1,
@@ -1007,6 +1025,7 @@ static int DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
     vlc_mutex_lock( &p_owner->lock );
     if( p_owner->i_preroll_end > p_picture->date )
     {
+        msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayVideo skip frame, preroll end %lld, frame %lld \n", p_owner->i_preroll_end, p_picture->date); // todo del
         vlc_mutex_unlock( &p_owner->lock );
         picture_Release( p_picture );
         return -1;
@@ -1014,6 +1033,7 @@ static int DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
 
     prerolled = p_owner->i_preroll_end > INT64_MIN;
     p_owner->i_preroll_end = INT64_MIN;
+    msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayVideo set preroll to %lld \n", INT64_MIN); // todo del
     vlc_mutex_unlock( &p_owner->lock );
 
     if( unlikely(prerolled) )
@@ -1143,6 +1163,7 @@ static int DecoderPlayAudio( decoder_t *p_dec, block_t *p_audio,
     vlc_mutex_lock( &p_owner->lock );
     if( p_owner->i_preroll_end > p_audio->i_pts )
     {
+        msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayAudio skip frame, preroll end %lld, frame %lld \n", p_owner->i_preroll_end, p_audio->i_pts); // todo del
         vlc_mutex_unlock( &p_owner->lock );
         block_Release( p_audio );
         return -1;
@@ -1151,6 +1172,7 @@ static int DecoderPlayAudio( decoder_t *p_dec, block_t *p_audio,
     prerolled = p_owner->i_preroll_end > INT64_MIN;
     p_owner->i_preroll_end = INT64_MIN;
     vlc_mutex_unlock( &p_owner->lock );
+    msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayAudio set preroll to %lld \n", INT64_MIN); // todo del
 
     if( unlikely(prerolled) )
     {
@@ -1318,6 +1340,7 @@ static int DecoderQueueSpu( decoder_t *p_dec, subpicture_t *p_spu )
             p_spu->i_start < p_owner->i_preroll_end &&
             ( p_spu->i_stop <= VLC_TICK_INVALID || p_spu->i_stop < p_owner->i_preroll_end ) )
         {
+            msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderQueueSpu skip frame, preroll end %lld, frame %lld \n", p_owner->i_preroll_end, p_spu->i_start); // todo del
             vlc_mutex_unlock( &p_owner->lock );
             subpicture_Delete( p_spu );
         }
@@ -1402,7 +1425,7 @@ static void DecoderProcess( decoder_t *p_dec, block_t *p_block )
             goto error;
 
         vlc_mutex_lock( &p_owner->lock );
-        DecoderUpdatePreroll( &p_owner->i_preroll_end, p_block );
+        DecoderUpdatePreroll( p_dec, &p_owner->i_preroll_end, p_block );
         vlc_mutex_unlock( &p_owner->lock );
         if( unlikely( p_block->i_flags & BLOCK_FLAG_CORE_PRIVATE_RELOADED ) )
         {
@@ -1530,6 +1553,8 @@ static void DecoderProcessFlush( decoder_t *p_dec )
 
     vlc_mutex_lock( &p_owner->lock );
     p_owner->i_preroll_end = INT64_MIN;
+    msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderProcessFlush set preroll to %lld \n", INT64_MIN); // todo del
+
     vlc_mutex_unlock( &p_owner->lock );
 }
 
@@ -1674,6 +1699,7 @@ static decoder_t * CreateDecoder( vlc_object_t *p_parent,
         vlc_object_release( p_dec );
         return NULL;
     }
+    msg_Info(p_input, "TRACK_SEEK decoder.c CreateDecoder set preroll to %lld \n", INT64_MIN); // todo del
     p_owner->i_preroll_end = INT64_MIN;
     p_owner->i_last_rate = INPUT_RATE_DEFAULT;
     p_owner->p_input = p_input;
