@@ -73,7 +73,7 @@ static int Control(stream_t *access, int query, va_list args)
             break;
 
         case STREAM_CAN_FASTSEEK:
-            *va_arg(args, bool *) = false;
+            *va_arg(args, bool *) = true;
             break;
 
         case STREAM_CAN_PAUSE:
