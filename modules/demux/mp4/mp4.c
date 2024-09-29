@@ -1469,6 +1469,7 @@ static int DemuxMoov( demux_t *p_demux )
     }
 
     p_sys->i_nztime += DEMUX_INCREMENT;
+    msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoov set i_nztime %lld \n", p_sys->i_nztime);
     if( p_sys->i_pcr > VLC_TICK_INVALID )
     {
         p_sys->i_pcr = VLC_TICK_0 + p_sys->i_nztime;
@@ -1554,6 +1555,7 @@ static int Seek( demux_t *p_demux, vlc_tick_t i_date, bool b_accurate )
     MP4ASF_ResetFrames( p_sys );
     /* update global time */
     p_sys->i_nztime = i_start;
+    msg_Info(p_demux, "TRACK_PROGRESS mp4.c Seek set i_nztime %lld \n", p_sys->i_nztime);
     p_sys->i_pcr  = VLC_TICK_INVALID;
 
     if( b_accurate )
@@ -1648,6 +1650,7 @@ static int FragSeekLoadFragment( demux_t *p_demux, uint32_t i_moox, stime_t i_mo
         p_sys->context.i_lastseqnumber = FragGetMoofSequenceNumber( p_moox );
 
         p_sys->i_nztime = FragGetDemuxTimeFromTracksTime( p_sys );
+        msg_Info(p_demux, "TRACK_PROGRESS mp4.c FragSeekLoadFragment set i_nztime %lld \n", p_sys->i_nztime);
         p_sys->i_pcr = VLC_TICK_INVALID;
     }
 
@@ -1811,6 +1814,7 @@ static int FragSeekToTime( demux_t *p_demux, vlc_tick_t i_nztime, bool b_accurat
         {
             MP4_TrackSeek( p_demux, &p_sys->track[i], i_sync_time );
             p_sys->i_nztime = i_sync_time;
+            msg_Info(p_demux, "TRACK_PROGRESS mp4.c FragSeekToTime set i_nztime %lld \n", p_sys->i_nztime);
             p_sys->i_pcr  = VLC_TICK_INVALID;
         }
         else
@@ -1965,7 +1969,10 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
         case DEMUX_GET_TIME:
             pi64 = va_arg( args, int64_t * );
             if( p_sys->i_timescale > 0 )
+            {
                 *pi64 = p_sys->i_nztime;
+                msg_Info(p_demux, "TRACK_PROGRESS mp4.c DEMUX_GET_TIME %lld \n", p_sys->i_nztime);
+            }
             else
                 *pi64 = 0;
             return VLC_SUCCESS;
@@ -4557,6 +4564,7 @@ static int DemuxMoof( demux_t *p_demux )
     if( i_status != VLC_DEMUXER_EOS )
     {
         p_sys->i_nztime += DEMUX_INCREMENT;
+        msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoof 1 set i_nztime %lld \n", p_sys->i_nztime);
         p_sys->i_pcr = VLC_TICK_0 + p_sys->i_nztime;
         es_out_SetPCR( p_demux->out, p_sys->i_pcr );
     }
@@ -4576,6 +4584,7 @@ static int DemuxMoof( demux_t *p_demux )
         if( i_segment_end != INT64_MAX )
         {
             p_sys->i_nztime = i_segment_end;
+            msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoof 2 set i_nztime %lld \n", p_sys->i_nztime);
             p_sys->i_pcr = VLC_TICK_0 + p_sys->i_nztime;
             es_out_SetPCR( p_demux->out, p_sys->i_pcr );
         }
@@ -5024,6 +5033,7 @@ static int DemuxFrag( demux_t *p_demux )
                     if( b_discontinuity )
                     {
                         p_sys->i_nztime = FragGetDemuxTimeFromTracksTime( p_sys );
+                        msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxFrag set i_nztime %lld \n", p_sys->i_nztime);
                         p_sys->i_pcr = VLC_TICK_INVALID;
                     }
                     /* !Prepare chunk */
