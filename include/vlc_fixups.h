@@ -163,11 +163,6 @@ void rewind (FILE *);
 int vasprintf (char **, const char *, va_list);
 #endif
 
-/* string.h */
-#ifndef HAVE_FFSLL
-int ffsll(long long);
-#endif
-
 #ifndef HAVE_MEMRCHR
 void *memrchr(const void *, int, size_t);
 #endif
