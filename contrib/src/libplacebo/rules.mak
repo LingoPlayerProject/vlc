@@ -27,9 +27,6 @@ $(TARBALLS)/$(PLACEBO_ARCHIVE):
 libplacebo: $(PLACEBO_ARCHIVE) .sum-libplacebo
 	$(UNPACK)
 	$(APPLY) $(SRC)/libplacebo/0001-build-use-a-Makefile.patch
-ifdef HAVE_ANDROID
-	$(APPLY) $(SRC)/libplacebo/fix-android-build.patch
-endif
 	$(MOVE)
 
 .libplacebo: libplacebo
