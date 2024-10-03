@@ -119,12 +119,39 @@ static int Open(vlc_object_t *object)
     int (*open_cb)(void *, void **, uint64_t *);
     void *opaque;
 
-    opaque = var_InheritAddress(access, "imem-data");
-    open_cb = var_InheritAddress(access, "imem-open");
+    if ( access->psz_filepath == NULL)
+    {
+        opaque = var_InheritAddress(access, "imem-data");
+        open_cb = var_InheritAddress(access, "imem-open");
+        sys->read_cb = var_InheritAddress(access, "imem-read");
+        sys->seek_cb = var_InheritAddress(access, "imem-seek");
+        sys->close_cb = var_InheritAddress(access, "imem-close");
+    } 
+    else
+    {
+        char *psz_name;
+        assert( asprintf( &psz_name, "imem-data-%s", access->psz_filepath ) != -1 );
+        opaque = var_InheritAddress(access, psz_name);
+        free(psz_name);
+
+        assert( asprintf( &psz_name, "imem-open-%s", access->psz_filepath ) != -1 );
+        open_cb = var_InheritAddress(access, psz_name);
+        free(psz_name);
+
+        assert( asprintf( &psz_name, "imem-read-%s", access->psz_filepath ) != -1 );
+        sys->read_cb = var_InheritAddress(access, psz_name);
+        free(psz_name);
+
+        assert( asprintf( &psz_name, "imem-seek-%s", access->psz_filepath ) != -1 );
+        sys->seek_cb = var_InheritAddress(access, psz_name);
+        free(psz_name);
+
+        assert( asprintf( &psz_name, "imem-close-%s", access->psz_filepath ) != -1 );
+        sys->close_cb = var_InheritAddress(access, psz_name);
+        free(psz_name);
+    }
+
     sys->opaque = NULL;
-    sys->read_cb = var_InheritAddress(access, "imem-read");
-    sys->seek_cb = var_InheritAddress(access, "imem-seek");
-    sys->close_cb = var_InheritAddress(access, "imem-close");
     sys->size = UINT64_MAX;
 
     if (open_cb == NULL)

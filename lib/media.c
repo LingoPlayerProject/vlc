@@ -514,6 +514,7 @@ libvlc_media_t *libvlc_media_new_callbacks(libvlc_instance_t *p_instance,
     input_item_AddOpaque(m->p_input_item, "imem-read", read_cb);
     input_item_AddOpaque(m->p_input_item, "imem-seek", seek_cb);
     input_item_AddOpaque(m->p_input_item, "imem-close", close_cb);
+    input_item_AddOpaque(m->p_input_item, "imem-close", close_cb);
     return m;
 }
 
@@ -1172,6 +1173,51 @@ libvlc_media_type_t libvlc_media_get_type( libvlc_media_t *p_md )
     default:
         return libvlc_media_type_unknown;
     }
+}
+
+int libvlc_media_slaves_add_callbacks( libvlc_media_t *p_md,
+                                       libvlc_media_slave_type_t i_type,
+                                       unsigned int i_priority,
+                                       libvlc_media_open_cb open_cb,
+                                       libvlc_media_read_cb read_cb,
+                                       libvlc_media_seek_cb seek_cb,
+                                       libvlc_media_close_cb close_cb,
+                                       void *opaque )
+{
+    assert(read_cb != NULL);
+
+    int i_slaves = p_md->p_input_item->i_slaves;
+    char *psz_uri;
+    // Assign a unique identifier to each slave's URI
+    assert( asprintf( &psz_uri, "imem://slave-%d", i_slaves ) != -1 );
+    int ret = libvlc_media_slaves_add( p_md, i_type, i_priority, psz_uri );
+    free( psz_uri );
+    if ( ret )
+        return ret;
+
+    // The slave's callback vars can be found by the URI's path part.
+    char *psz_name;
+    assert( asprintf( &psz_name, "imem-data-slave-%d", i_slaves ) != -1 );
+    input_item_AddOpaque(p_md->p_input_item, psz_name, opaque);
+    free(psz_name);
+
+    assert( asprintf( &psz_name, "imem-open-slave-%d", i_slaves ) != -1 );
+    input_item_AddOpaque(p_md->p_input_item, psz_name, open_cb);
+    free(psz_name);
+
+    assert( asprintf( &psz_name, "imem-read-slave-%d", i_slaves ) != -1 );
+    input_item_AddOpaque(p_md->p_input_item, psz_name, read_cb);
+    free(psz_name);
+
+    assert( asprintf( &psz_name, "imem-seek-slave-%d", i_slaves ) != -1 );
+    input_item_AddOpaque(p_md->p_input_item, psz_name, seek_cb);
+    free(psz_name);
+
+    assert( asprintf( &psz_name, "imem-close-slave-%d", i_slaves ) != -1 );
+    input_item_AddOpaque(p_md->p_input_item, psz_name, close_cb);
+    free(psz_name);
+
+    return 0;
 }
 
 int libvlc_media_slaves_add( libvlc_media_t *p_md,

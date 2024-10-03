@@ -841,6 +841,39 @@ int libvlc_media_slaves_add( libvlc_media_t *p_md,
                              const char *psz_uri );
 
 /**
+ * Add a slave media with custom callbacks to read the data from.
+ *
+ * A slave is an external input source that may contains an additional subtitle
+ * track (like a .srt) or an additional audio track (like a .ac3).
+ *
+ * \note This function must be called before the media is parsed (via
+ * libvlc_media_parse_with_options()) or before the media is played (via
+ * libvlc_media_player_play())
+ *
+ * \version LibVLC 3.0.0 and later.
+ *
+ * \param p_md media descriptor object
+ * \param i_type subtitle or audio
+ * \param i_priority from 0 (low priority) to 4 (high priority)
+ * \param open_cb callback to open the custom bitstream of slave input media
+ * \param read_cb callback to read data (must not be NULL)
+ * \param seek_cb callback to seek, or NULL if seeking is not supported
+ * \param close_cb callback to close the media, or NULL if unnecessary
+ * \param opaque data pointer for the open callback
+ *
+ * \return 0 on success, -1 on error.
+ */
+LIBVLC_API
+int libvlc_media_slaves_add_callbacks( libvlc_media_t *p_md,
+                                       libvlc_media_slave_type_t i_type,
+                                       unsigned int i_priority,
+                                       libvlc_media_open_cb open_cb,
+                                       libvlc_media_read_cb read_cb,
+                                       libvlc_media_seek_cb seek_cb,
+                                       libvlc_media_close_cb close_cb,
+                                       void *opaque );
+
+/**
  * Clear all slaves previously added by libvlc_media_slaves_add() or
  * internally.
  *
