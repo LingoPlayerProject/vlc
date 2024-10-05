@@ -130,6 +130,8 @@ void picture_Reset( picture_t *p_picture )
 {
     /* */
     p_picture->date = VLC_TICK_INVALID;
+    p_picture->stream_timestamp = VLC_TICK_INVALID;
+    p_picture->i_seek_date = VLC_TICK_INVALID;
     p_picture->b_force = false;
     p_picture->b_progressive = false;
     p_picture->i_nb_fields = 2;
@@ -358,6 +360,8 @@ void plane_CopyPixels( plane_t *p_dst, const plane_t *p_src )
 void picture_CopyProperties( picture_t *p_dst, const picture_t *p_src )
 {
     p_dst->date = p_src->date;
+    p_dst->stream_timestamp = p_src->stream_timestamp;
+    p_dst->i_seek_date = p_src->i_seek_date;
     p_dst->b_force = p_src->b_force;
 
     p_dst->b_progressive = p_src->b_progressive;

@@ -130,6 +130,9 @@ struct vout_thread_sys_t
     /* */
     vlc_mouse_t     mouse;
 
+    /*  */
+    vlc_tick_t  last_check_notify_date;
+
     /* */
     picture_pool_t  *private_pool;
     picture_pool_t  *display_pool;

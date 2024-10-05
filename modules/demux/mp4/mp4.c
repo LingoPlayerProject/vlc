@@ -1469,7 +1469,7 @@ static int DemuxMoov( demux_t *p_demux )
     }
 
     p_sys->i_nztime += DEMUX_INCREMENT;
-    msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoov set i_nztime %lld \n", p_sys->i_nztime);
+    //msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoov set i_nztime %lld \n", p_sys->i_nztime);
     if( p_sys->i_pcr > VLC_TICK_INVALID )
     {
         p_sys->i_pcr = VLC_TICK_0 + p_sys->i_nztime;
@@ -1971,7 +1971,7 @@ static int Control( demux_t *p_demux, int i_query, va_list args )
             if( p_sys->i_timescale > 0 )
             {
                 *pi64 = p_sys->i_nztime;
-                msg_Info(p_demux, "TRACK_PROGRESS mp4.c DEMUX_GET_TIME %lld \n", p_sys->i_nztime);
+                //msg_Info(p_demux, "TRACK_PROGRESS mp4.c DEMUX_GET_TIME %lld \n", p_sys->i_nztime);
             }
             else
                 *pi64 = 0;
@@ -4564,7 +4564,7 @@ static int DemuxMoof( demux_t *p_demux )
     if( i_status != VLC_DEMUXER_EOS )
     {
         p_sys->i_nztime += DEMUX_INCREMENT;
-        msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoof 1 set i_nztime %lld \n", p_sys->i_nztime);
+        //msg_Info(p_demux, "TRACK_PROGRESS mp4.c DemuxMoof 1 set i_nztime %lld \n", p_sys->i_nztime);
         p_sys->i_pcr = VLC_TICK_0 + p_sys->i_nztime;
         es_out_SetPCR( p_demux->out, p_sys->i_pcr );
     }

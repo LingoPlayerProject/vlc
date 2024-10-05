@@ -116,6 +116,8 @@ struct decoder_owner_sys_t
     vlc_tick_t pause_date;
     unsigned frames_countdown;
     bool paused;
+    /* Seek */
+    vlc_tick_t i_seek_date;
 
     bool error;
 
@@ -1029,6 +1031,9 @@ static int DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
     bool prerolled;
 
     vlc_mutex_lock( &p_owner->lock );
+    p_picture->stream_timestamp = p_picture->date;
+    p_picture->i_seek_date = p_owner->i_seek_date;
+    msg_Info(p_dec, "DecoderPlayVideo time %lld", p_picture->date);
     if( p_owner->i_preroll_end > p_picture->date )
     {
         msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayVideo skip frame, preroll end %lld, frame %lld \n", p_owner->i_preroll_end, p_picture->date); // todo del
@@ -1374,6 +1379,10 @@ static void DecoderProcess( decoder_t *p_dec, block_t *p_block );
 static void DecoderDecode( decoder_t *p_dec, block_t *p_block )
 {
     decoder_owner_sys_t *p_owner = p_dec->p_owner;
+
+    vlc_mutex_lock( &p_owner->lock );
+    p_owner->i_seek_date = p_block->i_seek_date;
+    vlc_mutex_unlock( &p_owner->lock );
 
     int ret = p_dec->pf_decode( p_dec, p_block );
     switch( ret )
@@ -1730,6 +1739,7 @@ static decoder_t * CreateDecoder( vlc_object_t *p_parent,
     p_owner->paused = false;
     p_owner->pause_date = VLC_TICK_INVALID;
     p_owner->frames_countdown = 0;
+    p_owner->i_seek_date = VLC_TICK_INVALID;
 
     p_owner->b_waiting = false;
     p_owner->b_first = true;
@@ -2072,7 +2082,7 @@ void input_DecoderDelete( decoder_t *p_dec )
 void input_DecoderDecode( decoder_t *p_dec, block_t *p_block, bool b_do_pace )
 {
     decoder_owner_sys_t *p_owner = p_dec->p_owner;
-
+    p_block->i_seek_date = var_GetInteger(p_owner->p_input, "seek-date");
     vlc_fifo_Lock( p_owner->p_fifo );
     if( !b_do_pace )
     {

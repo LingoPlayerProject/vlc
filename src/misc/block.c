@@ -85,6 +85,7 @@ void block_Init( block_t *restrict b, void *buf, size_t size )
     b->i_nb_samples = 0;
     b->i_pts =
     b->i_dts = VLC_TICK_INVALID;
+    b->i_seek_date = VLC_TICK_INVALID;
     b->i_length = 0;
 #ifndef NDEBUG
     b->pf_release = BlockNoRelease;

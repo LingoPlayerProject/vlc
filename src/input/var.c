@@ -474,6 +474,8 @@ void input_ConfigVarInit ( input_thread_t *p_input )
                     VLC_VAR_INTEGER | VLC_VAR_DOINHERIT);
     }
 
+    var_Create( p_input, "seek-date", VLC_VAR_INTEGER );
+
     var_Create( p_input, "can-seek", VLC_VAR_BOOL );
     var_SetBool( p_input, "can-seek", true ); /* Fixed later*/
 

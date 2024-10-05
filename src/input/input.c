@@ -2021,6 +2021,7 @@ static bool Control( input_thread_t *p_input,
             }
             else
             {
+                var_SetInteger(p_input, "seek-date", var_GetInteger(p_input->obj.parent, "seek-date"));
                 if( input_priv(p_input)->i_slave > 0 )
                     SlaveSeek( p_input, -1 );
                 input_priv(p_input)->master->b_eof = false;
@@ -2075,6 +2076,7 @@ static bool Control( input_thread_t *p_input,
             }
             else
             {
+                var_SetInteger(p_input, "seek-date", var_GetInteger(p_input->obj.parent, "seek-date"));
                 if( input_priv(p_input)->i_slave > 0 )
                     SlaveSeek( p_input, i_time );
                 input_priv(p_input)->master->b_eof = false;

@@ -1173,8 +1173,17 @@ static int ThreadDisplayRenderPicture(vout_thread_t *vout, bool is_forced)
     if (!is_forced)
         mwait(todisplay->date);
 
+    vlc_tick_t current = mdate();
+    // minimal notify interval is 10ms
+    if (current - vout->p->last_check_notify_date > 10000 &&
+        todisplay->i_seek_date >= var_GetInteger(vout->obj.parent, "seek-date"))
+    {
+        var_SetInteger(vout->obj.parent, "progress-bar-time", todisplay->stream_timestamp);
+    }
+    vout->p->last_check_notify_date = current;
+    msg_Info(vout, "vout_display_Display stream time %lld, seek date %lld", todisplay->stream_timestamp,  todisplay->i_seek_date);
     /* Display the direct buffer returned by vout_RenderPicture */
-    vout->p->displayed.date = mdate();
+    vout->p->displayed.date = current;
     vout_display_Display(vd, todisplay, subpic);
 
     vout_statistic_AddDisplayed(&vout->p->statistic, 1);

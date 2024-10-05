@@ -124,6 +124,7 @@ struct block_t
     vlc_tick_t  i_pts;
     vlc_tick_t  i_dts;
     vlc_tick_t  i_length;
+    vlc_tick_t  i_seek_date;
 
     /* Rudimentary support for overloading block (de)allocation. */
     block_free_t pf_release;

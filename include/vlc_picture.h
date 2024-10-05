@@ -80,6 +80,10 @@ struct picture_t
      * but should never be written directly */
     /**@{*/
     vlc_tick_t      date;                                  /**< display date */
+    /** picture timestamp (ms) in video stream, never be modified after the picture is created */
+    vlc_tick_t      stream_timestamp;                      
+    /** The last seek date, traced to the original seek operation date */
+    vlc_tick_t      i_seek_date;                       
     bool            b_force;
     /**@}*/
 

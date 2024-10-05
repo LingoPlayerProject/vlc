@@ -358,12 +358,6 @@ input_event_changed( vlc_object_t * p_this, char const * psz_cmd,
         event.u.media_player_position_changed.new_position =
                                           var_GetFloat( p_input, "position" );
         libvlc_event_send( &p_mi->event_manager, &event );
-
-        /* */
-        event.type = libvlc_MediaPlayerTimeChanged;
-        event.u.media_player_time_changed.new_time =
-           from_mtime(var_GetInteger( p_input, "time" ));
-        libvlc_event_send( &p_mi->event_manager, &event );
     }
     else if( newval.i_int == INPUT_EVENT_LENGTH )
     {
@@ -593,6 +587,22 @@ static int mute_changed(vlc_object_t *obj, const char *name, vlc_value_t old,
     return VLC_SUCCESS;
 }
 
+static int progress_bar_time_changed(vlc_object_t *obj, const char *name, vlc_value_t old,
+                        vlc_value_t cur, void *opaque)
+{
+    libvlc_media_player_t *mp = (libvlc_media_player_t *)obj;
+
+    if (old.i_int != cur.i_int)
+    {
+        libvlc_event_t event;
+        event.type = libvlc_MediaPlayerTimeChanged;
+        event.u.media_player_time_changed.new_time = from_mtime(cur.i_int);
+        libvlc_event_send(&mp->event_manager, &event);
+    }
+    VLC_UNUSED(name); VLC_UNUSED(opaque);
+    return VLC_SUCCESS;
+}
+
 static int volume_changed(vlc_object_t *obj, const char *name, vlc_value_t old,
                           vlc_value_t cur, void *opaque)
 {
@@ -639,6 +649,10 @@ libvlc_media_player_new( libvlc_instance_t *instance )
     var_Create (mp, "sout", VLC_VAR_STRING);
     var_Create (mp, "demux-filter", VLC_VAR_STRING);
     var_Create (mp, "input-record-path", VLC_VAR_STRING);
+
+    /* The time in the stream when a frame is actually output to the screen */
+    var_Create (mp, "progress-bar-time", VLC_VAR_INTEGER);
+    var_Create (mp, "seek-date", VLC_VAR_INTEGER);
 
     /* Video */
     var_Create (mp, "vout", VLC_VAR_STRING|VLC_VAR_DOINHERIT);
@@ -790,6 +804,8 @@ libvlc_media_player_new( libvlc_instance_t *instance )
      * want to expose it in such a limiting and ugly way.
      */
     var_AddCallback(mp->obj.libvlc, "snapshot-file", snapshot_was_taken, mp);
+
+    var_AddCallback(mp, "progress-bar-time", progress_bar_time_changed, NULL);
 
     libvlc_retain(instance);
     return mp;
@@ -1371,14 +1387,7 @@ libvlc_time_t libvlc_media_player_get_length(
 libvlc_time_t libvlc_media_player_get_time( libvlc_media_player_t *p_mi )
 {
     input_thread_t *p_input_thread;
-    libvlc_time_t i_time;
-
-    p_input_thread = libvlc_get_input_thread ( p_mi );
-    if( !p_input_thread )
-        return -1;
-
-    i_time = from_mtime(var_GetInteger( p_input_thread , "time" ));
-    vlc_object_release( p_input_thread );
+    libvlc_time_t i_time = from_mtime(var_GetInteger( p_mi , "progress-bar-time" ));
     return i_time;
 }
 
@@ -1391,6 +1400,8 @@ void libvlc_media_player_set_time( libvlc_media_player_t *p_mi,
     if( !p_input_thread )
         return;
 
+    var_SetInteger( p_mi, "seek-date", mdate() );
+    var_SetInteger( p_mi, "progress-bar-time", to_mtime(i_time) );
     var_SetBool( p_input_thread, "input-fast-seek", b_fast );
     var_SetInteger( p_input_thread, "time", to_mtime(i_time) );
     vlc_object_release( p_input_thread );
