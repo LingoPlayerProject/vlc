@@ -591,6 +591,13 @@ static int progress_bar_time_changed(vlc_object_t *obj, const char *name, vlc_va
                         vlc_value_t cur, void *opaque)
 {
     libvlc_media_player_t *mp = (libvlc_media_player_t *)obj;
+    input_thread_t *p_input = libvlc_get_input_thread ( mp );
+    if ( p_input == NULL)
+        return VLC_SUCCESS;
+    bool isPlaying = var_GetInteger( p_input, "state" ) == PLAYING_S;
+    vlc_object_release( p_input );
+    if( !isPlaying )
+        return VLC_SUCCESS;
 
     if (old.i_int != cur.i_int)
     {

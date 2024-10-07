@@ -222,7 +222,6 @@ static void PictureDisplay (vout_display_t *vd, picture_t *pic, subpicture_t *su
         vlc_gl_ReleaseCurrent (sys->gl);
     }
 
-    msg_Info(vd, "PictureDisplay %lld \n", pic->stream_timestamp / 1000);
     picture_Release (pic);
     if (subpicture != NULL)
         subpicture_Delete(subpicture);

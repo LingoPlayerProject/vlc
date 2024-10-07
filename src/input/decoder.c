@@ -1033,7 +1033,6 @@ static int DecoderPlayVideo( decoder_t *p_dec, picture_t *p_picture,
     vlc_mutex_lock( &p_owner->lock );
     p_picture->stream_timestamp = p_picture->date;
     p_picture->i_seek_date = p_owner->i_seek_date;
-    msg_Info(p_dec, "DecoderPlayVideo time %lld", p_picture->date);
     if( p_owner->i_preroll_end > p_picture->date )
     {
         msg_Info(p_dec, "TRACK_SEEK decoder.c DecoderPlayVideo skip frame, preroll end %lld, frame %lld \n", p_owner->i_preroll_end, p_picture->date); // todo del
@@ -1380,9 +1379,12 @@ static void DecoderDecode( decoder_t *p_dec, block_t *p_block )
 {
     decoder_owner_sys_t *p_owner = p_dec->p_owner;
 
-    vlc_mutex_lock( &p_owner->lock );
-    p_owner->i_seek_date = p_block->i_seek_date;
-    vlc_mutex_unlock( &p_owner->lock );
+    if ( p_block )
+    {
+        vlc_mutex_lock( &p_owner->lock );
+        p_owner->i_seek_date = p_block->i_seek_date;
+        vlc_mutex_unlock( &p_owner->lock );
+    }
 
     int ret = p_dec->pf_decode( p_dec, p_block );
     switch( ret )

@@ -1181,7 +1181,6 @@ static int ThreadDisplayRenderPicture(vout_thread_t *vout, bool is_forced)
         var_SetInteger(vout->obj.parent, "progress-bar-time", todisplay->stream_timestamp);
     }
     vout->p->last_check_notify_date = current;
-    msg_Info(vout, "vout_display_Display stream time %lld, seek date %lld", todisplay->stream_timestamp,  todisplay->i_seek_date);
     /* Display the direct buffer returned by vout_RenderPicture */
     vout->p->displayed.date = current;
     vout_display_Display(vd, todisplay, subpic);
